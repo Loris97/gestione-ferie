@@ -7,6 +7,8 @@ use App\Models\Ferie;
 use App\Models\Dipendente;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Mail\FerieStatusMail;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Controller per la gestione delle richieste ferie.
@@ -14,14 +16,6 @@ use Carbon\Carbon;
  */
 class FerieController extends Controller
 {
-    /**
-     * Mostra la lista delle ferie (non implementato qui).
-     */
-    public function index()
-    {
-        //
-    }
-
     /**
      * Mostra il form per creare una nuova richiesta ferie.
      */
@@ -66,51 +60,38 @@ class FerieController extends Controller
     }
 
     /**
-     * Mostra una richiesta ferie specifica (non implementato qui).
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Mostra il form per modificare una richiesta ferie (non implementato qui).
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Aggiorna una richiesta ferie (non implementato qui).
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Elimina una richiesta ferie (non implementato qui).
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    /**
-     * Aggiorna lo stato di una richiesta ferie (approvato/rifiutato).
+     * Aggiorna lo stato di una richiesta ferie (approvato/rifiutato) e invia una mail formale al dipendente.
      * Solo l'admin può eseguire questa azione.
+     *
+     * @param Request $request La richiesta HTTP contenente il nuovo stato.
+     * @param int $id L'ID della richiesta ferie da aggiornare.
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function updateStatus(Request $request, $id)
     {
+        // Valida che il campo 'stato' sia presente e abbia un valore valido
         $request->validate([
             'stato' => 'required|in:approvato,rifiutato',
         ]);
 
+        // Recupera la richiesta ferie dal database tramite ID
         $feria = Ferie::findOrFail($id);
+
+        // Aggiorna lo stato della richiesta ferie (approvato o rifiutato)
         $feria->stato = $request->stato;
         $feria->save();
 
+        // Recupera il dipendente associato alla richiesta ferie
+        $dipendente = $feria->dipendente;
+
+        // Recupera l'utente associato al dipendente (per ottenere l'email)
+        $user = $dipendente->user;
+
+        // Invia una mail formale al dipendente con l'esito della richiesta ferie
+        // Usa la Mailable FerieStatusMail che riceve la richiesta ferie, il dipendente e lo stato
+        Mail::to($user->email)->send(new FerieStatusMail($feria, $dipendente, $feria->stato));
+
+        // Torna alla pagina precedente con un messaggio di successo
         return redirect()->back()->with('success', 'Stato aggiornato con successo.');
     }
 
