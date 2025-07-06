@@ -84,6 +84,10 @@ class FerieController extends Controller
         // Recupera il dipendente associato alla richiesta ferie
         $dipendente = $feria->dipendente;
 
+        if (!$dipendente || !$dipendente->user) {
+            return redirect()->back()->withErrors(['msg' => 'Dipendente o utente associato non trovato.']);
+        }
+
         // Recupera l'utente associato al dipendente (per ottenere l'email)
         $user = $dipendente->user;
 
