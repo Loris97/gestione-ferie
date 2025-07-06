@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
-COPY . /var/www/html
-WORKDIR /var/www/html
+# Modifica la root Apache da /var/www/html a /var/www/public
+RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-default.conf
+
+COPY . /var/www
+WORKDIR /var/www
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
