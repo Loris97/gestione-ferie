@@ -59,20 +59,3 @@ Route::middleware(['auth', 'must_change_password', IsDipendente::class])->group(
     Route::get('/auth/change-password', [PasswordController::class, 'showChangeForm'])->name('password.change');
     Route::post('/auth/change-password', [PasswordController::class, 'change'])->name('password.update');
 });
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-
-Route::get('/setup-admin', function () {
-    if (User::where('email', 'admin@example.com')->exists()) {
-        return 'Admin già esistente.';
-    }
-
-    User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => Hash::make('password123'),
-        'is_admin' => true, // se hai una colonna per distinguere gli admin
-    ]);
-
-    return 'Admin creato con successo!';
-});

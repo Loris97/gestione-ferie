@@ -19,7 +19,7 @@ Un'applicazione web per la gestione delle ferie aziendali, sviluppata in Laravel
 Sito a scopo dimostrativo. Nessun dato reale viene raccolto o memorizzato.
 
 ## 📌 Prossimi sviluppi
-- [ ] Notifica via email per approvazione ferie
+- [x] Notifica via email per approvazione ferie
 
 ---
 
